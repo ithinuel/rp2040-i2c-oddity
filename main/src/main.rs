@@ -5,17 +5,19 @@ use cortex_m_rt::entry;
 use defmt::*;
 use defmt_rtt as _;
 use eh1_0_alpha::i2c::Error;
-use embedded_hal::blocking::i2c::Read;
-use embedded_hal::timer::CountDown;
-use embedded_time::duration::Extensions as _;
+use embedded_hal::blocking::i2c::{Write, WriteRead};
+//use embedded_hal::timer::CountDown;
+//use embedded_time::duration::Extensions as _;
 use embedded_time::rate::Extensions as _;
 use panic_probe as _;
 
 //use rp_pico as bsp;
-use solderparty_rp2040_stamp as bsp;
+//use solderparty_rp2040_stamp as bsp;
+use sparkfun_pro_micro_rp2040 as bsp;
 
 use bsp::hal::{
     clocks::{init_clocks_and_plls, Clock},
+    gpio::{Function, Pin, I2C},
     pac,
     sio::Sio,
     watchdog::Watchdog,
@@ -50,35 +52,48 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
-    let timer = bsp::hal::timer::Timer::new(pac.TIMER, &mut pac.RESETS);
+    let _timer = bsp::hal::timer::Timer::new(pac.TIMER, &mut pac.RESETS);
 
-    let mut sda = pins.gpio4.into_mode();
-    let mut scl = pins.gpio5.into_mode();
+    //let [>mut<] sda: Pin<_, Function<I2C>> = pins.gpio4.into_mode();
+    //let [>mut<] scl: Pin<_, Function<I2C>> = pins.gpio5.into_mode();
+    let mut sda: Pin<_, Function<I2C>> = pins.tx0.into_mode();
+    let mut scl: Pin<_, Function<I2C>> = pins.rx0.into_mode();
     scl.set_drive_strength(bsp::hal::gpio::OutputDriveStrength::TwoMilliAmps);
     sda.set_drive_strength(bsp::hal::gpio::OutputDriveStrength::TwoMilliAmps);
 
-    let mut ctrl = bsp::hal::i2c::I2C::new_controller(
+    let mut periph = bsp::hal::i2c::I2C::new_peripheral_event_iterator(
         pac.I2C0,
         sda,
         scl,
-        50_000.Hz(),
+        &mut pac.RESETS,
+        0x055u16,
+    );
+    periph.next();
+    let (i2c, (sda, scl)) = periph.free(&mut pac.RESETS);
+
+    let mut ctrl = bsp::hal::i2c::I2C::new_controller(
+        i2c,
+        sda,
+        scl,
+        400_000.Hz(),
         &mut pac.RESETS,
         clocks.system_clock.freq(),
     );
 
     info!("ready");
-    let mut buffer = [0; 16];
+    let mut buffer = [0; 24];
     loop {
-        let res = ctrl.read(0x55, &mut buffer[..8]);
+        let res = ctrl.write_read(0x55, &[0x80], &mut buffer);
         match res {
             Err(err @ bsp::hal::i2c::Error::Abort(_)) => {
                 info!("read: Err(Abort({}))", defmt::Debug2Format(&err.kind()))
             }
             _ => info!("read: {}", defmt::Debug2Format(&res)),
         }
+        let _ = ctrl.write(0x55, &[0x81, 0x02, 0x03]);
 
-        let mut cd = timer.count_down();
-        cd.start(250_000.microseconds());
-        let _ = nb::block!(cd.wait());
+        //let mut cd = timer.count_down();
+        //cd.start(250_000.microseconds());
+        //let _ = nb::block!(cd.wait());
     }
 }

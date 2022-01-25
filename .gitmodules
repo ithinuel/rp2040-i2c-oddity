@@ -1,0 +1,3 @@
+[submodule "hal"]
+	path = rp-hal
+	url = git@github.com:ithinuel/rp-hal

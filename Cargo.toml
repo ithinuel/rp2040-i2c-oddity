@@ -2,9 +2,10 @@
 members = ["main", "secondary"]
 
 [patch.crates-io]
-rp2040-hal = { git = "https://github.com/rp-rs/rp-hal" }
-rp-pico = {  git = "https://github.com/rp-rs/rp-hal" }
-solderparty-rp2040-stamp = {  git = "https://github.com/rp-rs/rp-hal" }
+rp2040-hal = { path = "./rp-hal/rp2040-hal" }
+rp-pico = { path = "./rp-hal/boards/rp-pico" }
+solderparty-rp2040-stamp = { path = "./rp-hal/boards/solderparty-rp2040-stamp" }
+sparkfun-pro-micro-rp2040 = { path = "./rp-hal/boards/sparkfun-pro-micro-rp2040" }
 #rp2040-hal = { path = "./rp-hal/rp2040-hal" }
 #rp-pico = { path = "./rp-hal/boards/rp-pico" }
 #solderparty-rp2040-stamp = { path = "./rp-hal/boards/solderparty-rp2040-stamp" }
