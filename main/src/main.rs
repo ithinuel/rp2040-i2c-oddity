@@ -12,8 +12,8 @@ use embedded_time::rate::Extensions as _;
 use panic_probe as _;
 
 //use rp_pico as bsp;
-//use solderparty_rp2040_stamp as bsp;
-use sparkfun_pro_micro_rp2040 as bsp;
+use solderparty_rp2040_stamp as bsp;
+//use sparkfun_pro_micro_rp2040 as bsp;
 
 use bsp::hal::{
     clocks::{init_clocks_and_plls, Clock},
@@ -54,12 +54,12 @@ fn main() -> ! {
 
     let _timer = bsp::hal::timer::Timer::new(pac.TIMER, &mut pac.RESETS);
 
-    //let [>mut<] sda: Pin<_, Function<I2C>> = pins.gpio4.into_mode();
-    //let [>mut<] scl: Pin<_, Function<I2C>> = pins.gpio5.into_mode();
-    let mut sda: Pin<_, Function<I2C>> = pins.tx0.into_mode();
-    let mut scl: Pin<_, Function<I2C>> = pins.rx0.into_mode();
-    scl.set_drive_strength(bsp::hal::gpio::OutputDriveStrength::TwoMilliAmps);
-    sda.set_drive_strength(bsp::hal::gpio::OutputDriveStrength::TwoMilliAmps);
+    let /*mut*/ sda: Pin<_, Function<I2C>> = pins.gpio4.into_mode();
+    let /*mut*/ scl: Pin<_, Function<I2C>> = pins.gpio5.into_mode();
+    //let mut sda: Pin<_, Function<I2C>> = pins.tx0.into_mode();
+    //let mut scl: Pin<_, Function<I2C>> = pins.rx0.into_mode();
+    //scl.set_drive_strength(bsp::hal::gpio::OutputDriveStrength::TwoMilliAmps);
+    //sda.set_drive_strength(bsp::hal::gpio::OutputDriveStrength::TwoMilliAmps);
 
     let mut periph = bsp::hal::i2c::I2C::new_peripheral_event_iterator(
         pac.I2C0,
